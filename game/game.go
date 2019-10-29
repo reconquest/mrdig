@@ -30,6 +30,3 @@ func (game *game) Layout(width int, height int) (int, int) {
 func init() {
 	mobile.SetGame(&game{})
 }
-
-// At least one exported function is required by gomobile.
-func Init() {}
