@@ -10,17 +10,32 @@ KEYS_ALIAS     = mrdig
 
 _ADB=adb -s $(shell adb devices -l | tail -n+2 | cut -f1 -d' ' | head -n1)
 
-ifdef FASTBUILD
-GRADLE_BUILD_FLAGS = -x lint -x lintVitalRelease
-else
-GRADLE_BUILD_FLAGS =
-endif
+_GO_SRC=$(shell find ../game/ -type f)
 
-run: install
+_flags: $(filter +%,$(MAKECMDGOALS))
+
++fast: +nolint +noaar
+
++nolint:
+	$(eval GRADLE_BUILD_FLAGS += -x lint -x lintVitalRelease)
+
++noaar:
+	$(eval _AAR=:)
+
+debug@run: debug@install
 	$(_ADB) shell am start -n $(ANDROID_PACKAGE)/.MainActivity
 
-install: build/mrdig.apk
+debug@install: debug@apk
 	$(_ADB) install -r build/mrdig.apk
+
+build/game.aar: $(_GO_SRC)
+	@$(_AAR) echo :: building game aar
+	@$(_AAR) GO111MODULE=off \
+		ebitenmobile bind \
+		-target android \
+		-javapkg $(ANDROID_PACKAGE) \
+		-o build/game.aar \
+		github.com/reconquest/mrdig/game
 
 .keystore:
 	@echo :: initializing keystore
@@ -35,19 +50,20 @@ install: build/mrdig.apk
 		-dname $(KEYS_DN) \
 		-deststoretype pkcs12
 
-build/mrdig.apk: .keystore java
+debug@apk: _flags .keystore build/game.aar
+	@echo :: building apk
+	@gradle assembleDebug $(GRADLE_BUILD_FLAGS)
+	@mv build/outputs/apk/debug/android-debug.apk build/mrdig.apk
 
-java: .keystore
-	gradle assembleDebug $(GRADLE_BUILD_FLAGS)
-	mv build/outputs/apk/debug/android-debug.apk build/mrdig.apk
+debug: debug@run
 
 clean:
-	rm -rf build
-	go clean -cache
+	@rm -rf build
+	@go clean -cache
 
 eclipse:
-	gradle eclipse
-	gradle pom
+	@gradle eclipse
+	@gradle pom
 
 eclipse-clean:
-	rm -rf .classpath .project .settings
+	@rm -rf .classpath .project .settings

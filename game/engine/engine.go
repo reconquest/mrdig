@@ -1,16 +1,19 @@
-package game
+package engine
 
 import (
 	"fmt"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-	"github.com/hajimehoshi/ebiten/mobile"
 )
 
-type game struct{}
+type Engine struct{}
 
-func (game *game) Update(screen *ebiten.Image) error {
+func New() *Engine {
+	return &Engine{}
+}
+
+func (engine *Engine) Update(screen *ebiten.Image) error {
 	if ebiten.IsDrawingSkipped() {
 		return nil
 	}
@@ -23,10 +26,6 @@ func (game *game) Update(screen *ebiten.Image) error {
 	return nil
 }
 
-func (game *game) Layout(width int, height int) (int, int) {
+func (engine *Engine) Layout(width int, height int) (int, int) {
 	return width, height
-}
-
-func init() {
-	mobile.SetGame(&game{})
 }

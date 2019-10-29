@@ -1,4 +1,12 @@
 package game
 
-// At least one exported function is required by gomobile.
+import (
+	"github.com/hajimehoshi/ebiten/mobile"
+	"github.com/reconquest/mrdig/game/engine"
+)
+
 func Init() {}
+
+func init() {
+	mobile.SetGame(engine.New())
+}
