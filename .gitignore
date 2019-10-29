@@ -1,0 +1,7 @@
+/android/.gradle
+/android/.settings
+/android/.classpath
+/android/.project
+/android/.keystore
+/android/build
+/android/target

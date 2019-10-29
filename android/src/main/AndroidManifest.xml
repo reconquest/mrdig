@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+<manifest xmlns:android='http://schemas.android.com/apk/res/android' package='io.reconquest.mrdig' android:versionCode='0' android:versionName='0'>
+    <application android:label='mrdig'>
+        <activity android:name='io.reconquest.mrdig.MainActivity' android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+             <intent-filter>
+                <category android:name='android.intent.category.LAUNCHER'/>
+                <action android:name='android.intent.action.MAIN'/>
+             </intent-filter>
+        </activity>
+    </application>
+</manifest>

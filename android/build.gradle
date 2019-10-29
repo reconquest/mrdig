@@ -1,0 +1,117 @@
+apply plugin: 'com.android.application'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+apply plugin: 'io.reconquest.gradle-android-eclipse'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        maven {
+          url "https://maven.reconquest.io/"
+        }
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.+'
+        classpath 'io.reconquest:gradle-android-eclipse:1.2'
+    }
+}
+
+android {
+    compileSdkVersion  29
+    buildToolsVersion  '29.0.0'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError false
+        disable 'RtlHardcoded', 'HardcodedText', 'ContentDescription', 'GoogleAppIndexingWarning'
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file(".keystore")
+            storePassword '123456'
+            keyAlias 'mrdig'
+            keyPassword '123456'
+        }
+    }
+
+    defaultConfig {
+        applicationId 'io.reconquest.mrdig'
+        minSdkVersion 26
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ""
+            debuggable true
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+            zipAlignEnabled true
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    google()
+    flatDir {
+        dirs 'build'
+    }
+}
+
+dependencies {
+    implementation 'com.google.android:android:4.1.1.4'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.1.0-beta01'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+
+    implementation name: 'game', ext: 'aar'
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+configurations.implementation.setCanBeResolved(true)
+
+eclipse {
+  classpath {
+    plusConfigurations += [ configurations.implementation ]
+    downloadSources = true
+  }
+}
+
+eclipse.jdt.file.withProperties { props ->
+    props.put('org.eclipse.jdt.core.compiler.codegen.targetPlatform', '1.8')
+    props.put('org.eclipse.jdt.core.compiler.source', '1.8')
+    props.put('org.eclipse.jdt.core.compiler.compliance', '1.8')
+}
+
+task pom {
+    pom {
+        project {
+            groupId 'io.reconquest.mrdig'
+            artifactId 'mrdig'
+            version 'POM'
+        }
+    }.withXml {
+        def androidHome = System.getenv("ANDROID_HOME");
+
+        def systemPath = androidHome + "/platforms/" +
+            android.compileSdkVersion +
+            "/android.jar"
+
+        def dependency = asNode().appendNode('dependencies').appendNode('dependency')
+        dependency.appendNode('groupId', 'android')
+        dependency.appendNode('artifactId', android.compileSdkVersion)
+        dependency.appendNode('version', android.compileSdkVersion)
+        dependency.appendNode('systemPath', systemPath)
+    }.writeTo("pom.xml")
+}
